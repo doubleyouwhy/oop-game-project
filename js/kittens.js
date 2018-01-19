@@ -12,10 +12,14 @@ var PLAYER_HEIGHT = 54;
 // These two constants keep us from using "magic numbers" in our code
 var LEFT_ARROW_CODE = 37;
 var RIGHT_ARROW_CODE = 39;
+var UP_ARROW_CODE = 38;
+var DOWN_ARROW_CODE = 40;
 
 // These two constants allow us to DRY
 var MOVE_LEFT = 'left';
 var MOVE_RIGHT = 'right';
+var MOVE_UP = 'up';
+var MOVE_DOWN = 'down';
 
 // Preload game images
 var images = {};
@@ -34,7 +38,7 @@ class Enemy {
         this.sprite = images['enemy.png'];
 
         // Each enemy should have a different speed
-        this.speed = Math.random() / 2 + 0.25;
+        this.speed = Math.random() / 4 + 0.25;
     }
 
     update(timeDiff) {
@@ -59,6 +63,10 @@ class Player {
             this.x = this.x - PLAYER_WIDTH;
         } else if (direction === MOVE_RIGHT && this.x < GAME_WIDTH - PLAYER_WIDTH) {
             this.x = this.x + PLAYER_WIDTH;
+        } else if (direction === MOVE_UP && this.y < GAME_HEIGHT - PLAYER_HEIGHT) {
+            this.y = this.y - PLAYER_HEIGHT;
+        } else if (direction === MOVE_DOWN && this.y < GAME_HEIGHT - PLAYER_HEIGHT) {
+            this.y = this.y + PLAYER_HEIGHT;
         }
     }
 
@@ -66,7 +74,6 @@ class Player {
         ctx.drawImage(this.sprite, this.x, this.y);
     }
 }
-
 
 
 /*
@@ -131,6 +138,10 @@ class Engine {
                 this.player.move(MOVE_LEFT);
             } else if (e.keyCode === RIGHT_ARROW_CODE) {
                 this.player.move(MOVE_RIGHT);
+            } else if (e.keyCode === UP_ARROW_CODE) {
+                this.player.move(MOVE_UP);
+            } else if (e.keyCode === DOWN_ARROW_CODE) {
+                this.player.move(MOVE_DOWN);
             }
         });
 
@@ -193,7 +204,7 @@ class Engine {
     isPlayerDead() {
         var enemyHit = (enemy) => {
             if (enemy.x === this.player.x && enemy.y > 300) {
-                return true
+                return true;
             }
         };
         return this.enemies.some(enemyHit);
