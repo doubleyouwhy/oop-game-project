@@ -1,10 +1,10 @@
 // This sectin contains some game constants. It is not super interesting
-var GAME_WIDTH = 375;
-var GAME_HEIGHT = 500;
+var GAME_WIDTH = 800;
+var GAME_HEIGHT = 600;
 
 var ENEMY_WIDTH = 75;
 var ENEMY_HEIGHT = 156;
-var MAX_ENEMIES = 3;
+var MAX_ENEMIES = 5;
 
 var PLAYER_WIDTH = 75;
 var PLAYER_HEIGHT = 54;
@@ -15,6 +15,8 @@ var RIGHT_ARROW_CODE = 39;
 var UP_ARROW_CODE = 38;
 var DOWN_ARROW_CODE = 40;
 var SPACE_CODE = 32;
+var ENTER_CODE = 13;
+
 
 // These two constants allow us to DRY
 var MOVE_LEFT = 'left';
@@ -22,10 +24,11 @@ var MOVE_RIGHT = 'right';
 var MOVE_UP = 'up';
 var MOVE_DOWN = 'down';
 var SPACE = 'space'
+var ENTER = 'enter'
 
 // Preload game images
 var images = {};
-['enemy.png', 'stars.png', 'player.png', 'enemy2.png'].forEach(imgName => {
+['enemy.png', 'stars2.png', 'player.png', 'enemy2.png'].forEach(imgName => {
     var img = document.createElement('img');
     img.src = 'images/' + imgName;
     images[imgName] = img;
@@ -45,10 +48,10 @@ class Enemy extends Entity {
         super();
         this.x = xPos;
         this.y = -ENEMY_HEIGHT;
-        this.sprite = images['enemy.png', 'enemy2.png'];
+        this.sprite = images['enemy2.png', 'enemy.png'];
 
         // Each enemy should have a different speed
-        this.speed = Math.random() / 4 + 0.25;
+        this.speed = Math.random() / 2 + 0.25;
     }
 
     update(timeDiff) {
@@ -147,6 +150,8 @@ class Engine {
                 this.player.move(MOVE_UP);
             } else if (e.keyCode === DOWN_ARROW_CODE) {
                 this.player.move(MOVE_DOWN);
+            } else if (e.keyCode === ENTER_CODE) {
+                document.location.reload();
             }
         });
 
@@ -175,7 +180,7 @@ class Engine {
         this.enemies.forEach(enemy => enemy.update(timeDiff));
 
         // Draw everything!
-        this.ctx.drawImage(images['stars.png'], 0, 0); // draw the star bg
+        this.ctx.drawImage(images['stars2.png'], 0, 0); // draw the star bg
         this.enemies.forEach(enemy => enemy.render(this.ctx)); // draw the enemies
         this.player.render(this.ctx); // draw the player
 
@@ -190,16 +195,17 @@ class Engine {
         // Check if player is dead
         if (this.isPlayerDead()) {
             // If they are dead, then it's game over!
-            this.ctx.font = 'bold 30px Impact';
+            this.ctx.font = 'bold 40px Helvetica';
             this.ctx.fillStyle = '#ffffff';
-            this.ctx.fillText(this.score + '  LOSER', 5, 30);
-            this.ctx.fillText('PRESS "R" TO RESTART', 55, 250);
+            this.ctx.fillText('FINAL SCORE ' + this.score, 8, 40);
+            this.ctx.fillText('GAME OVER', 275, 300);
+            this.ctx.fillText('TRY AGAIN LOSER', 200, 350);
 
         } else {
             // If player is not dead, then draw the score
-            this.ctx.font = 'bold 30px Impact';
+            this.ctx.font = 'bold 40px Helvetica';
             this.ctx.fillStyle = '#ffffff';
-            this.ctx.fillText(this.score, 5, 30);
+            this.ctx.fillText(this.score, 8, 40);
 
             // Set the time marker and redraw
             this.lastFrame = Date.now();
@@ -224,12 +230,14 @@ var gameEngine = new Engine(document.getElementById('app'));
 gameEngine.start();
 
 
+
 ///FEATURES TO ADD:
 // 1: Add a start screen
-// 2: Press Enter to restart on game-over
+// 2: Press Enter to restart on game-over --- DONE!
 // 2: Have 2 different enemies (safe one + one that ends the game)
 // 3: Add 'bonus' sprite which adds points to conuter
 // 4: Add music during gameplay, sound on game-over and when crossing the safe enemy
 // 5: Redesign Game Over screen
 // 6: Add Background Music
 // 7: Add function to shoot the enemies from the player
+// 8: Player = Kanye or Kanye Bear cartoon
