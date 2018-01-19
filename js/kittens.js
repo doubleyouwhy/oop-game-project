@@ -26,9 +26,6 @@ var images = {};
 });
 
 
-
-
-
 // This section is where you will be doing most of your coding
 class Enemy {
     constructor(xPos) {
@@ -60,8 +57,7 @@ class Player {
     move(direction) {
         if (direction === MOVE_LEFT && this.x > 0) {
             this.x = this.x - PLAYER_WIDTH;
-        }
-        else if (direction === MOVE_RIGHT && this.x < GAME_WIDTH - PLAYER_WIDTH) {
+        } else if (direction === MOVE_RIGHT && this.x < GAME_WIDTH - PLAYER_WIDTH) {
             this.x = this.x + PLAYER_WIDTH;
         }
     }
@@ -70,8 +66,6 @@ class Player {
         ctx.drawImage(this.sprite, this.x, this.y);
     }
 }
-
-
 
 
 
@@ -120,10 +114,9 @@ class Engine {
 
         var enemySpot;
         // Keep looping until we find a free enemy spot at random
-        while (!enemySpot || this.enemies[enemySpot]) {
+        while (enemySpot === true || this.enemies[enemySpot]) {
             enemySpot = Math.floor(Math.random() * enemySpots);
         }
-
         this.enemies[enemySpot] = new Enemy(enemySpot * ENEMY_WIDTH);
     }
 
@@ -136,8 +129,7 @@ class Engine {
         document.addEventListener('keydown', e => {
             if (e.keyCode === LEFT_ARROW_CODE) {
                 this.player.move(MOVE_LEFT);
-            }
-            else if (e.keyCode === RIGHT_ARROW_CODE) {
+            } else if (e.keyCode === RIGHT_ARROW_CODE) {
                 this.player.move(MOVE_RIGHT);
             }
         });
@@ -185,8 +177,7 @@ class Engine {
             this.ctx.font = 'bold 30px Impact';
             this.ctx.fillStyle = '#ffffff';
             this.ctx.fillText(this.score + ' GAME OVER', 5, 30);
-        }
-        else {
+        } else {
             // If player is not dead, then draw the score
             this.ctx.font = 'bold 30px Impact';
             this.ctx.fillStyle = '#ffffff';
@@ -195,17 +186,19 @@ class Engine {
             // Set the time marker and redraw
             this.lastFrame = Date.now();
             requestAnimationFrame(this.gameLoop);
+
         }
     }
 
     isPlayerDead() {
-        // TODO: fix this function!
-        return false;
+        var enemyHit = (enemy) => {
+            if (enemy.x === this.player.x && enemy.y > 300) {
+                return true
+            }
+        };
+        return this.enemies.some(enemyHit);
     }
 }
-
-
-
 
 
 // This section will start the game
