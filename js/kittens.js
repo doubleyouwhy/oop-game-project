@@ -14,16 +14,18 @@ var LEFT_ARROW_CODE = 37;
 var RIGHT_ARROW_CODE = 39;
 var UP_ARROW_CODE = 38;
 var DOWN_ARROW_CODE = 40;
+var SPACE_CODE = 32;
 
 // These two constants allow us to DRY
 var MOVE_LEFT = 'left';
 var MOVE_RIGHT = 'right';
 var MOVE_UP = 'up';
 var MOVE_DOWN = 'down';
+var SPACE = 'space'
 
 // Preload game images
 var images = {};
-['enemy.png', 'stars.png', 'player.png', 'flame.png'].forEach(imgName => {
+['enemy.png', 'stars.png', 'player.png', 'enemy2.png'].forEach(imgName => {
     var img = document.createElement('img');
     img.src = 'images/' + imgName;
     images[imgName] = img;
@@ -43,7 +45,7 @@ class Enemy extends Entity {
         super();
         this.x = xPos;
         this.y = -ENEMY_HEIGHT;
-        this.sprite = images['enemy.png'];
+        this.sprite = images['enemy.png', 'enemy2.png'];
 
         // Each enemy should have a different speed
         this.speed = Math.random() / 4 + 0.25;
@@ -58,7 +60,7 @@ class Player extends Entity {
     constructor() {
         super();
         this.x = 2 * PLAYER_WIDTH;
-        this.y = GAME_HEIGHT - PLAYER_HEIGHT - 10;
+        this.y = GAME_HEIGHT - PLAYER_HEIGHT;
         this.sprite = images['player.png'];
     }
 
@@ -66,10 +68,13 @@ class Player extends Entity {
     move(direction) {
         if (direction === MOVE_LEFT && this.x > 0) {
             this.x = this.x - PLAYER_WIDTH;
+
         } else if (direction === MOVE_RIGHT && this.x < GAME_WIDTH - PLAYER_WIDTH) {
             this.x = this.x + PLAYER_WIDTH;
-        } else if (direction === MOVE_UP && this.y < GAME_HEIGHT - PLAYER_HEIGHT) {
+
+        } else if (direction === MOVE_UP && this.y > 0) {
             this.y = this.y - PLAYER_HEIGHT;
+
         } else if (direction === MOVE_DOWN && this.y < GAME_HEIGHT - PLAYER_HEIGHT) {
             this.y = this.y + PLAYER_HEIGHT;
         }
@@ -187,8 +192,8 @@ class Engine {
             // If they are dead, then it's game over!
             this.ctx.font = 'bold 30px Impact';
             this.ctx.fillStyle = '#ffffff';
-            this.ctx.fillText(this.score + ' GAME OVER', 5, 30);
-            this.ctx.fillText('PRESS "R" TO RESTART', 5, 255);
+            this.ctx.fillText(this.score + '  LOSER', 5, 30);
+            this.ctx.fillText('PRESS "R" TO RESTART', 55, 250);
 
         } else {
             // If player is not dead, then draw the score
@@ -204,7 +209,9 @@ class Engine {
 
     isPlayerDead() {
         var enemyHit = (enemy) => {
-            if (enemy.x === this.player.x && (enemy.y + ENEMY_HEIGHT) >= this.player.y) {
+            if (enemy.x === this.player.x
+                && (enemy.y > this.player.y - ENEMY_HEIGHT)
+                && enemy.y < this.player.y ){
                 return true;
             }
         };
@@ -215,3 +222,14 @@ class Engine {
 // This section will start the game
 var gameEngine = new Engine(document.getElementById('app'));
 gameEngine.start();
+
+
+///FEATURES TO ADD:
+// 1: Add a start screen
+// 2: Press Enter to restart on game-over
+// 2: Have 2 different enemies (safe one + one that ends the game)
+// 3: Add 'bonus' sprite which adds points to conuter
+// 4: Add music during gameplay, sound on game-over and when crossing the safe enemy
+// 5: Redesign Game Over screen
+// 6: Add Background Music
+// 7: Add function to shoot the enemies from the player
