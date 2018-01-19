@@ -23,7 +23,7 @@ var MOVE_DOWN = 'down';
 
 // Preload game images
 var images = {};
-['enemy.png', 'stars.png', 'player.png'].forEach(imgName => {
+['enemy.png', 'stars.png', 'player.png', 'flame.png'].forEach(imgName => {
     var img = document.createElement('img');
     img.src = 'images/' + imgName;
     images[imgName] = img;
@@ -31,8 +31,16 @@ var images = {};
 
 
 // This section is where you will be doing most of your coding
-class Enemy {
+
+class Entity {
+    render(ctx) {
+        ctx.drawImage(this.sprite, this.x, this.y);
+    }
+}
+
+class Enemy extends Entity {
     constructor(xPos) {
+        super();
         this.x = xPos;
         this.y = -ENEMY_HEIGHT;
         this.sprite = images['enemy.png'];
@@ -44,20 +52,17 @@ class Enemy {
     update(timeDiff) {
         this.y = this.y + timeDiff * this.speed;
     }
-
-    render(ctx) {
-        ctx.drawImage(this.sprite, this.x, this.y);
-    }
 }
 
-class Player {
+class Player extends Entity {
     constructor() {
+        super();
         this.x = 2 * PLAYER_WIDTH;
         this.y = GAME_HEIGHT - PLAYER_HEIGHT - 10;
         this.sprite = images['player.png'];
     }
 
-    // This method is called by the game engine when left/right arrows are pressed
+    // This method is called by the game engine when left/right/up/down arrows are pressed
     move(direction) {
         if (direction === MOVE_LEFT && this.x > 0) {
             this.x = this.x - PLAYER_WIDTH;
@@ -69,12 +74,7 @@ class Player {
             this.y = this.y + PLAYER_HEIGHT;
         }
     }
-
-    render(ctx) {
-        ctx.drawImage(this.sprite, this.x, this.y);
-    }
 }
-
 
 /*
 This section is a tiny game engine.
@@ -188,6 +188,8 @@ class Engine {
             this.ctx.font = 'bold 30px Impact';
             this.ctx.fillStyle = '#ffffff';
             this.ctx.fillText(this.score + ' GAME OVER', 5, 30);
+            this.ctx.fillText('PRESS "R" TO RESTART', 5, 255);
+
         } else {
             // If player is not dead, then draw the score
             this.ctx.font = 'bold 30px Impact';
@@ -197,20 +199,18 @@ class Engine {
             // Set the time marker and redraw
             this.lastFrame = Date.now();
             requestAnimationFrame(this.gameLoop);
-
         }
     }
 
     isPlayerDead() {
         var enemyHit = (enemy) => {
-            if (enemy.x === this.player.x && enemy.y > 300) {
+            if (enemy.x === this.player.x && (enemy.y + ENEMY_HEIGHT) >= this.player.y) {
                 return true;
             }
         };
         return this.enemies.some(enemyHit);
     }
 }
-
 
 // This section will start the game
 var gameEngine = new Engine(document.getElementById('app'));
