@@ -3,12 +3,22 @@
 // 2: Add an end screen (w/ Game Over Message, Press to Restart, New Image, Final Score)
 //--- DONE! 3: Press Enter to restart on game-over
 // 4: Have 2 different enemies (safe one + one that ends the game)
-// 5: Add 'bonus' sprite which adds points to conuter
-// 6: Add music during gameplay, sound on game-over and when crossing the safe enemy
-// 7: Redesign Game Over screen
+//--- DONE! 5: Add 'bonus' sprite which adds points to conuter
+//--- DONE! 6: Add music during gameplay, sound on game-over and when crossing the safe enemy
+// 7: Redesign Game-Over screen
 //--- DONE! 8: Add Background Music
 // 9: Add function to shoot the enemies from the player
 //--- DONE! 10: Player = Kanye or Kanye Bear cartoon
+
+
+// ELEMENTS FROM EACH YE ERA:
+// College Dropout:
+// Late Registration:
+// Graduation: Bonus Point Sprite - Kanye Bear
+// 808s & Heartbreaks: 'Heart' User Lives or Bullets
+// My Beautiful Dark Twisted Fantasy: Background Image
+// Yeezus: Game Over Music "Bound 2" + Red Square Motif
+// The Life of Pablo: Game Play Background Song "Fade"
 
 
 // This sectin contains some game constants. It is not super interesting
@@ -28,7 +38,9 @@ var PLAYER_HEIGHT = 54;
 
 var BGM = document.getElementById('bgm');
 var KNYE_1 = document.getElementById('kanye1');
+BGM.volume = 0.4;
 var END_SONG = document.getElementById('end_song');
+END_SONG.volume = 0.4;
 
 
 // These constants keep us from using "magic numbers" in our code
@@ -49,7 +61,7 @@ var ENTER = 'enter'
 
 // Preload game images
 var images = {};
-['enemy.png', 'stars2.png', 'player.png', 'player2.png', 'enemy2.png'].forEach(imgName => {
+['bonus.png', 'stars2.png', 'fakes.png', 'boosts.png', 'player2.png'].forEach(imgName => {
     var img = document.createElement('img');
     img.src = 'images/' + imgName;
     images[imgName] = img;
@@ -68,7 +80,7 @@ class Enemy extends Entity {
         super();
         this.x = xPos;
         this.y = -ENEMY_HEIGHT;
-        this.sprite = images['enemy2.png'];
+        this.sprite = images['fakes.png'];
 
         // Each enemy should have a different speed
         this.speed = Math.random() / 2 + 0.25;
@@ -84,7 +96,7 @@ class Bonus extends Entity {
         super();
         this.x = xPos;
         this.y = -BONUS_HEIGHT;
-        this.sprite = images['enemy.png'];
+        this.sprite = images['bonus.png'];
 
         // Each enemy should have a different speed
         this.speed = Math.random() / 4 + 0.25;
@@ -102,7 +114,6 @@ class Player extends Entity {
         this.y = GAME_HEIGHT - 150;
         this.sprite = images['player2.png'];
     }
-
 
     // This method is called by the game engine when left/right/up/down arrows are pressed
     move(direction) {
@@ -128,12 +139,13 @@ The engine will try to draw your game at 60 frames per second using the requestA
 */
 class Engine {
     constructor(element) {
-        // Setup the player
-        this.player = new Player();
 
         // Setup enemies, making sure there are always three
         this.setupEnemies();
         this.setupBonus();
+
+        // Setup the player
+        this.player = new Player();
 
         // Setup the <canvas> element where we will be drawing
         var canvas = document.createElement('canvas');
@@ -212,7 +224,7 @@ class Engine {
             } else if (e.keyCode === ENTER_CODE) {
                 document.location.reload();
             }
-            
+
         });
 
         this.gameLoop();
@@ -240,14 +252,13 @@ class Engine {
         // Call update on all enemies
         this.enemies.forEach(enemy => enemy.update(timeDiff));
         this.bonus.forEach(bonus => bonus.update(timeDiff));
-        
+
 
         // Draw everything!
         this.ctx.drawImage(images['stars2.png'], 0, 0); // draw the star bg
         this.enemies.forEach(enemy => enemy.render(this.ctx)); // draw the enemies
-        this.player.render(this.ctx); // draw the player
         this.bonus.forEach(bonus => bonus.render(this.ctx)); // draw the bonus
-        
+        this.player.render(this.ctx); // draw the player
 
         // Check if any enemies should die
         this.enemies.forEach((enemy, enemyIdx) => {
@@ -263,13 +274,23 @@ class Engine {
             }
         });
         this.setupBonus();
+        if (this.isBonusPoint()) {
+            this.ctx.fillStyle = "red";
+            this.ctx.fillRect(580, 230, 220, 200);
+            this.ctx.font = 'bold 60px Helvetica';
+            this.ctx.fillStyle = '#000000';
+            this.ctx.fillText('+ 350', 615, 345);
+            this.score += 350;
+            this.bonus.display = 'none';
+            KNYE_1.play();
+        }
 
         // Check if player is dead
         if (this.isPlayerDead()) {
             // If they are dead, then it's game over!
             this.ctx.fillStyle = "red";
             this.ctx.fillRect(185, 230, 425, 150);
-            this.ctx.font = 'bold 40px Helvetica';
+            this.ctx.font = '700 40px Helvetica';
             this.ctx.fillStyle = '#ffffff';
             this.ctx.fillText('FINAL SCORE ' + this.score, 8, 40);
             this.ctx.fillText('GAME OVER', 275, 290);
@@ -279,12 +300,6 @@ class Engine {
             setTimeout(function () {
                 END_SONG.pause()
             }, 13650);
-            var restartMsg = function(){
-                this.ctx.font = 'bold 40px Helvetica';
-                this.ctx.fillStyle = '#ffffff';
-                this.ctx.fillText('PRESS ENTER TO RESTART', 40, 39);
-            }
-            restartMsg();
         } else {
             // If player is not dead, then draw the score
             this.ctx.font = 'bold 40px Helvetica';
@@ -306,6 +321,17 @@ class Engine {
             }
         };
         return this.enemies.some(enemyHit);
+    }
+
+    isBonusPoint() {
+        var bonusHit = (bonus) => {
+            if (bonus.x === this.player.x &&
+                (bonus.y > this.player.y - BONUS_HEIGHT) &&
+                bonus.y < this.player.y) {
+                return true;
+            }
+        };
+        return this.bonus.some(bonusHit);
     }
 }
 

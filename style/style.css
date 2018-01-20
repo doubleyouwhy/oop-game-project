@@ -1,12 +1,14 @@
-
 canvas {
         padding-left: 0;
         padding-right: 0;
+        margin-top: 40px;
         margin-left: auto;
         margin-right: auto;
-        margin-top: auto;
-        margin-bottom: auto;
         display: flex;
         align-items: center;
-        background-color: black;
+        justify-content: center;
+}
+
+body {
+    background-color: black;
 }
