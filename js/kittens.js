@@ -1,3 +1,16 @@
+///FEATURES TO ADD:
+// 1: Add a start screen
+// 2: Add an end screen (w/ Game Over Message, Press to Restart, New Image, Final Score)
+//--- DONE! 3: Press Enter to restart on game-over
+// 4: Have 2 different enemies (safe one + one that ends the game)
+// 5: Add 'bonus' sprite which adds points to conuter
+// 6: Add music during gameplay, sound on game-over and when crossing the safe enemy
+// 7: Redesign Game Over screen
+//--- DONE! 8: Add Background Music
+// 9: Add function to shoot the enemies from the player
+//--- DONE! 10: Player = Kanye or Kanye Bear cartoon
+
+
 // This sectin contains some game constants. It is not super interesting
 var GAME_WIDTH = 800;
 var GAME_HEIGHT = 600;
@@ -9,6 +22,11 @@ var MAX_ENEMIES = 5;
 var PLAYER_WIDTH = 75;
 var PLAYER_HEIGHT = 54;
 
+var BGM = document.getElementById('bgm');
+var KNYE_1 = document.getElementById('kanye1');
+var END_SONG = document.getElementById('end_song');
+
+
 // These two constants keep us from using "magic numbers" in our code
 var LEFT_ARROW_CODE = 37;
 var RIGHT_ARROW_CODE = 39;
@@ -16,7 +34,6 @@ var UP_ARROW_CODE = 38;
 var DOWN_ARROW_CODE = 40;
 var SPACE_CODE = 32;
 var ENTER_CODE = 13;
-
 
 // These two constants allow us to DRY
 var MOVE_LEFT = 'left';
@@ -28,7 +45,7 @@ var ENTER = 'enter'
 
 // Preload game images
 var images = {};
-['enemy.png', 'stars2.png', 'player.png', 'enemy2.png'].forEach(imgName => {
+['enemy.png', 'stars2.png', 'player.png', 'player2.png', 'enemy2.png'].forEach(imgName => {
     var img = document.createElement('img');
     img.src = 'images/' + imgName;
     images[imgName] = img;
@@ -48,7 +65,7 @@ class Enemy extends Entity {
         super();
         this.x = xPos;
         this.y = -ENEMY_HEIGHT;
-        this.sprite = images['enemy2.png', 'enemy.png'];
+        this.sprite = images['enemy2.png'];
 
         // Each enemy should have a different speed
         this.speed = Math.random() / 2 + 0.25;
@@ -62,9 +79,9 @@ class Enemy extends Entity {
 class Player extends Entity {
     constructor() {
         super();
-        this.x = 2 * PLAYER_WIDTH;
-        this.y = GAME_HEIGHT - PLAYER_HEIGHT;
-        this.sprite = images['player.png'];
+        this.x = 5 * PLAYER_WIDTH;
+        this.y = GAME_HEIGHT - 150;
+        this.sprite = images['player2.png'];
     }
 
     // This method is called by the game engine when left/right/up/down arrows are pressed
@@ -156,6 +173,7 @@ class Engine {
         });
 
         this.gameLoop();
+        BGM.play();
     }
 
     /*
@@ -195,12 +213,24 @@ class Engine {
         // Check if player is dead
         if (this.isPlayerDead()) {
             // If they are dead, then it's game over!
+            this.ctx.fillStyle = "red";
+            this.ctx.fillRect(185, 230, 425, 150);
             this.ctx.font = 'bold 40px Helvetica';
             this.ctx.fillStyle = '#ffffff';
             this.ctx.fillText('FINAL SCORE ' + this.score, 8, 40);
-            this.ctx.fillText('GAME OVER', 275, 300);
-            this.ctx.fillText('TRY AGAIN LOSER', 200, 350);
-
+            this.ctx.fillText('GAME OVER', 275, 290);
+            this.ctx.fillText('TRY AGAIN LOSER', 210, 335);
+            BGM.pause();
+            END_SONG.play();
+            setTimeout(function () {
+                END_SONG.pause()
+            }, 13650);
+            var restartMsg = function(){
+                this.ctx.font = 'bold 40px Helvetica';
+                this.ctx.fillStyle = '#ffffff';
+                this.ctx.fillText('PRESS ENTER TO RESTART', 40, 39);
+            }
+            restartMsg();
         } else {
             // If player is not dead, then draw the score
             this.ctx.font = 'bold 40px Helvetica';
@@ -215,9 +245,9 @@ class Engine {
 
     isPlayerDead() {
         var enemyHit = (enemy) => {
-            if (enemy.x === this.player.x
-                && (enemy.y > this.player.y - ENEMY_HEIGHT)
-                && enemy.y < this.player.y ){
+            if (enemy.x === this.player.x &&
+                (enemy.y > this.player.y - ENEMY_HEIGHT) &&
+                enemy.y < this.player.y) {
                 return true;
             }
         };
@@ -228,16 +258,3 @@ class Engine {
 // This section will start the game
 var gameEngine = new Engine(document.getElementById('app'));
 gameEngine.start();
-
-
-
-///FEATURES TO ADD:
-// 1: Add a start screen
-// 2: Press Enter to restart on game-over --- DONE!
-// 2: Have 2 different enemies (safe one + one that ends the game)
-// 3: Add 'bonus' sprite which adds points to conuter
-// 4: Add music during gameplay, sound on game-over and when crossing the safe enemy
-// 5: Redesign Game Over screen
-// 6: Add Background Music
-// 7: Add function to shoot the enemies from the player
-// 8: Player = Kanye or Kanye Bear cartoon
