@@ -17,7 +17,11 @@ var GAME_HEIGHT = 600;
 
 var ENEMY_WIDTH = 75;
 var ENEMY_HEIGHT = 156;
-var MAX_ENEMIES = 5;
+var MAX_ENEMIES = 4;
+
+var BONUS_WIDTH = 75;
+var BONUS_HEIGHT = 156;
+var MAX_BONUS = 1;
 
 var PLAYER_WIDTH = 75;
 var PLAYER_HEIGHT = 54;
@@ -27,7 +31,7 @@ var KNYE_1 = document.getElementById('kanye1');
 var END_SONG = document.getElementById('end_song');
 
 
-// These two constants keep us from using "magic numbers" in our code
+// These constants keep us from using "magic numbers" in our code
 var LEFT_ARROW_CODE = 37;
 var RIGHT_ARROW_CODE = 39;
 var UP_ARROW_CODE = 38;
@@ -35,7 +39,7 @@ var DOWN_ARROW_CODE = 40;
 var SPACE_CODE = 32;
 var ENTER_CODE = 13;
 
-// These two constants allow us to DRY
+// These constants allow us to DRY
 var MOVE_LEFT = 'left';
 var MOVE_RIGHT = 'right';
 var MOVE_UP = 'up';
@@ -53,7 +57,6 @@ var images = {};
 
 
 // This section is where you will be doing most of your coding
-
 class Entity {
     render(ctx) {
         ctx.drawImage(this.sprite, this.x, this.y);
@@ -76,6 +79,22 @@ class Enemy extends Entity {
     }
 }
 
+class Bonus extends Entity {
+    constructor(xPos) {
+        super();
+        this.x = xPos;
+        this.y = -BONUS_HEIGHT;
+        this.sprite = images['enemy.png'];
+
+        // Each enemy should have a different speed
+        this.speed = Math.random() / 4 + 0.25;
+    }
+
+    update(timeDiff) {
+        this.y = this.y + timeDiff * this.speed;
+    }
+}
+
 class Player extends Entity {
     constructor() {
         super();
@@ -83,6 +102,7 @@ class Player extends Entity {
         this.y = GAME_HEIGHT - 150;
         this.sprite = images['player2.png'];
     }
+
 
     // This method is called by the game engine when left/right/up/down arrows are pressed
     move(direction) {
@@ -113,6 +133,7 @@ class Engine {
 
         // Setup enemies, making sure there are always three
         this.setupEnemies();
+        this.setupBonus();
 
         // Setup the <canvas> element where we will be drawing
         var canvas = document.createElement('canvas');
@@ -152,6 +173,27 @@ class Engine {
         this.enemies[enemySpot] = new Enemy(enemySpot * ENEMY_WIDTH);
     }
 
+    setupBonus() {
+        if (!this.bonus) {
+            this.bonus = [];
+        }
+
+        while (this.bonus.filter(e => !!e).length < MAX_BONUS) {
+            this.addBonus();
+        }
+    }
+
+    addBonus() {
+        var bonusSpots = GAME_WIDTH / BONUS_WIDTH;
+
+        var bonusSpot;
+        // Keep looping until we find a free enemy spot at random
+        while (bonusSpot === true || this.bonus[bonusSpot]) {
+            bonusSpot = Math.floor(Math.random() * bonusSpots);
+        }
+        this.bonus[bonusSpot] = new Bonus(bonusSpot * BONUS_WIDTH);
+    }
+
     // This method kicks off the game
     start() {
         this.score = 0;
@@ -170,6 +212,7 @@ class Engine {
             } else if (e.keyCode === ENTER_CODE) {
                 document.location.reload();
             }
+            
         });
 
         this.gameLoop();
@@ -196,11 +239,15 @@ class Engine {
 
         // Call update on all enemies
         this.enemies.forEach(enemy => enemy.update(timeDiff));
+        this.bonus.forEach(bonus => bonus.update(timeDiff));
+        
 
         // Draw everything!
         this.ctx.drawImage(images['stars2.png'], 0, 0); // draw the star bg
         this.enemies.forEach(enemy => enemy.render(this.ctx)); // draw the enemies
         this.player.render(this.ctx); // draw the player
+        this.bonus.forEach(bonus => bonus.render(this.ctx)); // draw the bonus
+        
 
         // Check if any enemies should die
         this.enemies.forEach((enemy, enemyIdx) => {
@@ -209,6 +256,13 @@ class Engine {
             }
         });
         this.setupEnemies();
+
+        this.bonus.forEach((bonus, bonusIdx) => {
+            if (bonus.y > GAME_HEIGHT) {
+                delete this.bonus[bonusIdx];
+            }
+        });
+        this.setupBonus();
 
         // Check if player is dead
         if (this.isPlayerDead()) {
