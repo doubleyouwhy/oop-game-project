@@ -1,14 +1,65 @@
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.info,
+.game {
+    color: white;
+    background-color: rgb(0, 0, 0);
+    font-family: 'VT323', monospace;
+    padding-left: 25px;
+    padding-right: 25px;
+}
+
+.info h1 {
+    font-size: 80px;
+    margin-top: 0px;
+    padding-top: 0px;
+}
+
+.game h2 {
+    font-size: 20px;
+    font-weight: 400;
+    text-align: right;
+}
+
+.info p {
+    font-size: 25px;
+}
+
+.game a {
+    color: white;
+}
+
+.info img {
+    width: 160px;
+    margin-bottom: -5px;
+    margin-top: 50px;
+    margin-left: 15px;
+}
+
+mark {
+    background-color: red;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
 canvas {
-        padding-left: 0;
-        padding-right: 0;
-        margin-top: 40px;
-        margin-left: auto;
-        margin-right: auto;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    padding-left: 0;
+    padding-right: 0;
+    margin-left: auto;
+    align-items: right;
+    justify-content: right;
 }
 
 body {
     background-color: black;
+}
+
+#game {
+    margin-top: auto;
+    margin-bottom: auto;
+    display: flex;
 }

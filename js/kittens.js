@@ -1,24 +1,25 @@
 ///FEATURES TO ADD:
 // 1: Add a start screen
-// 2: Add an end screen (w/ Game Over Message, Press to Restart, New Image, Final Score)
+//--- DONE! 2: Add an end screen (w/ Game Over Message, Press to Restart, New Image, Final Score)
 //--- DONE! 3: Press Enter to restart on game-over
-// 4: Have 2 different enemies (safe one + one that ends the game)
+//--- DONE! 4: Have 2 different Yeezy Boosts (safe/"real" ones + fake ones that ends the game)
 //--- DONE! 5: Add 'bonus' sprite which adds points to conuter
 //--- DONE! 6: Add music during gameplay, sound on game-over and when crossing the safe enemy
-// 7: Redesign Game-Over screen
+//--- DONE! 7: Redesign Game-Over screen
 //--- DONE! 8: Add Background Music
-// 9: Add function to shoot the enemies from the player
-//--- DONE! 10: Player = Kanye or Kanye Bear cartoon
+// 9: Add function to shoot the enemies
+//--- DONE! 10: Player = Kanye
+// 11: Make background image pan horizontally
 
 
-// ELEMENTS FROM EACH YE ERA:
-// College Dropout:
-// Late Registration:
-// Graduation: Bonus Point Sprite - Kanye Bear
-// 808s & Heartbreaks: 'Heart' User Lives or Bullets
-// My Beautiful Dark Twisted Fantasy: Background Image
-// Yeezus: Game Over Music "Bound 2" + Red Square Motif
-// The Life of Pablo: Game Play Background Song "Fade"
+// 10 ELEMENTS FROM EACH YE ALBUM:
+// College Dropout: (1)"Two Words Game Over" message in reference to "Two Words" (track 18)
+// Late Registration: (2)Jamie Foxx sample from "Gold Digger" (track 4) & (3)Game elements are 'touching' the sky BG image... "Touch The Sky" (track 3)
+// Graduation: (4)Bonus Bear +350 Points - Kanye Bear illustration from Graduation
+// 808s & Heartbreaks: (5)'Heart' User Lives or Bullets
+// My Beautiful Dark Twisted Fantasy: (6)Scream sampled from "Monster" (track 6) + (7)Background Image is a zoom in of 1 of the 9 official alternate album covers
+// Yeezus: (8)Game Over song "Bound 2" (track 10) + (9)Red Square motif on the right references album cover's red tape design
+// The Life of Pablo: (10)Game Play Background song "Fade" (track 19)
 
 
 // This sectin contains some game constants. It is not super interesting
@@ -29,19 +30,31 @@ var ENEMY_WIDTH = 75;
 var ENEMY_HEIGHT = 156;
 var MAX_ENEMIES = 4;
 
+var FRIENDLY_WIDTH = 75;
+var FRIENDLY_HEIGHT = 156;
+var MAX_FRIENDLY = 1.5;
+
 var BONUS_WIDTH = 75;
-var BONUS_HEIGHT = 156;
+var BONUS_HEIGHT = 119;
 var MAX_BONUS = 1;
+
+var GOLD_WIDTH = 75;
+var GOLD_HEIGHT = 156;
+var MAX_GOLD = .5;
 
 var PLAYER_WIDTH = 75;
 var PLAYER_HEIGHT = 54;
 
+// Game music and sounds
 var BGM = document.getElementById('bgm');
-var KNYE_1 = document.getElementById('kanye1');
-BGM.volume = 0.4;
+BGM.volume = .38;
 var END_SONG = document.getElementById('end_song');
-END_SONG.volume = 0.4;
-
+END_SONG.volume = .3;
+var KNYE_1 = document.getElementById('kanye1');
+var KNYE_2 = document.getElementById('kanye2');
+var KNYE_3 = document.getElementById('scream');
+KNYE_3.volume = .3;
+var GOD = document.getElementById('god');
 
 // These constants keep us from using "magic numbers" in our code
 var LEFT_ARROW_CODE = 37;
@@ -61,7 +74,7 @@ var ENTER = 'enter'
 
 // Preload game images
 var images = {};
-['bonus.png', 'stars2.png', 'fakes.png', 'boosts.png', 'player2.png'].forEach(imgName => {
+['bonus.png', 'stars2.png', 'fakes.png', 'boosts.png', 'player2.png', 'jesus.png'].forEach(imgName => {
     var img = document.createElement('img');
     img.src = 'images/' + imgName;
     images[imgName] = img;
@@ -100,6 +113,36 @@ class Bonus extends Entity {
 
         // Each enemy should have a different speed
         this.speed = Math.random() / 4 + 0.25;
+    }
+    update(timeDiff) {
+        this.y = this.y + timeDiff * this.speed;
+    }
+}
+
+class Gold extends Bonus {
+    constructor(xPos) {
+        super();
+        this.x = xPos;
+        this.y = -BONUS_HEIGHT;
+        this.sprite = images['jesus.png'];
+
+        // Each enemy should have a different speed
+        this.speed = Math.random() / 4 + 0.25;
+    }
+    update(timeDiff) {
+        this.y = this.y + timeDiff * this.speed;
+    }
+}
+
+class Friend extends Entity {
+    constructor(xPos) {
+        super();
+        this.x = xPos;
+        this.y = -FRIENDLY_HEIGHT;
+        this.sprite = images['boosts.png'];
+
+        // Each enemy should have a different speed
+        this.speed = Math.random() / 10 + 0.25;
     }
 
     update(timeDiff) {
@@ -142,7 +185,9 @@ class Engine {
 
         // Setup enemies, making sure there are always three
         this.setupEnemies();
+        this.setupFriends();
         this.setupBonus();
+        this.setupGold();
 
         // Setup the player
         this.player = new Player();
@@ -185,6 +230,28 @@ class Engine {
         this.enemies[enemySpot] = new Enemy(enemySpot * ENEMY_WIDTH);
     }
 
+    setupFriends() {
+        if (!this.friends) {
+            this.friends = [];
+        }
+
+        while (this.friends.filter(e => !!e).length < MAX_FRIENDLY) {
+            this.addFriend();
+        }
+    }
+
+    // This method finds a random spot where there is no enemy, and puts one in there
+    addFriend() {
+        var friendSpots = GAME_WIDTH / FRIENDLY_WIDTH;
+
+        var friendSpot;
+        // Keep looping until we find a free enemy spot at random
+        while (friendSpot === true || this.friends[friendSpot]) {
+            friendSpot = Math.floor(Math.random() * friendSpots);
+        }
+        this.friends[friendSpot] = new Friend(friendSpot * FRIENDLY_WIDTH);
+    }
+
     setupBonus() {
         if (!this.bonus) {
             this.bonus = [];
@@ -204,6 +271,27 @@ class Engine {
             bonusSpot = Math.floor(Math.random() * bonusSpots);
         }
         this.bonus[bonusSpot] = new Bonus(bonusSpot * BONUS_WIDTH);
+    }
+
+    setupGold() {
+        if (!this.gold) {
+            this.gold = [];
+        }
+
+        while (this.gold.filter(e => !!e).length < MAX_GOLD) {
+            this.addGold();
+        }
+    }
+
+    addGold() {
+        var goldSpots = GAME_WIDTH / GOLD_WIDTH;
+
+        var goldSpot;
+        // Keep looping until we find a free enemy spot at random
+        while (goldSpot === true || this.gold[goldSpot]) {
+            goldSpot = Math.floor(Math.random() * goldSpots);
+        }
+        this.gold[goldSpot] = new Gold(goldSpot * GOLD_WIDTH);
     }
 
     // This method kicks off the game
@@ -251,13 +339,17 @@ class Engine {
 
         // Call update on all enemies
         this.enemies.forEach(enemy => enemy.update(timeDiff));
+        this.friends.forEach(friend => friend.update(timeDiff));
         this.bonus.forEach(bonus => bonus.update(timeDiff));
+        this.gold.forEach(gold => gold.update(timeDiff));
 
 
         // Draw everything!
         this.ctx.drawImage(images['stars2.png'], 0, 0); // draw the star bg
         this.enemies.forEach(enemy => enemy.render(this.ctx)); // draw the enemies
+        this.friends.forEach(friend => friend.render(this.ctx)); // draw the enemies
         this.bonus.forEach(bonus => bonus.render(this.ctx)); // draw the bonus
+        this.gold.forEach(gold => gold.render(this.ctx)); // draw the bonus
         this.player.render(this.ctx); // draw the player
 
         // Check if any enemies should die
@@ -268,20 +360,46 @@ class Engine {
         });
         this.setupEnemies();
 
+        this.friends.forEach((friend, friendIdx) => {
+            if (friend.y > GAME_HEIGHT) {
+                delete this.friends[friendIdx];
+            }
+        });
+        this.setupFriends();
+
         this.bonus.forEach((bonus, bonusIdx) => {
             if (bonus.y > GAME_HEIGHT) {
                 delete this.bonus[bonusIdx];
             }
         });
         this.setupBonus();
+
+        this.gold.forEach((gold, goldIdx) => {
+            if (gold.y > GAME_HEIGHT) {
+                delete this.gold[goldIdx];
+            }
+        });
+        this.setupGold();
+
+        // Check if real pair of Boosts
+        if (this.isGold()) {
+            this.ctx.fillStyle = "red";
+            this.ctx.fillRect(580, 230, 220, 200);
+            this.ctx.font = 'bold 60px VT323';
+            this.ctx.fillStyle = '#000000';
+            this.ctx.fillText('+ 1,050', 615, 340);
+            this.score += 350;
+            GOD.play();
+        }
+
+        // Check if Bonus Bear
         if (this.isBonusPoint()) {
             this.ctx.fillStyle = "red";
             this.ctx.fillRect(580, 230, 220, 200);
-            this.ctx.font = 'bold 60px Helvetica';
+            this.ctx.font = 'bold 75px VT323';
             this.ctx.fillStyle = '#000000';
-            this.ctx.fillText('+ 350', 615, 345);
+            this.ctx.fillText('+ 350', 615, 355);
             this.score += 350;
-            this.bonus.display = 'none';
             KNYE_1.play();
         }
 
@@ -289,20 +407,30 @@ class Engine {
         if (this.isPlayerDead()) {
             // If they are dead, then it's game over!
             this.ctx.fillStyle = "red";
-            this.ctx.fillRect(185, 230, 425, 150);
-            this.ctx.font = '700 40px Helvetica';
+            this.ctx.fillRect(185, 230, 425, 100);
+            this.ctx.font = '700 40px VT323';
             this.ctx.fillStyle = '#ffffff';
             this.ctx.fillText('FINAL SCORE ' + this.score, 8, 40);
-            this.ctx.fillText('GAME OVER', 275, 290);
-            this.ctx.fillText('TRY AGAIN LOSER', 210, 335);
+            this.ctx.fillText('TWO WORDS: GAME OVER', 236, 290);
+            this.ctx.fillStyle = "black";
+            this.ctx.fillRect(300, 450, 200, 45);
+            this.ctx.font = '700 20px VT323';
+            this.ctx.fillStyle = '#ffffff';
+            this.ctx.fillText('TRY AGAIN > HIT ENTER', 315, 477);
             BGM.pause();
-            END_SONG.play();
+            GOD.pause();
+            KNYE_1.pause();
+            KNYE_3.play();
             setTimeout(function () {
-                END_SONG.pause()
-            }, 13650);
+                END_SONG.play();
+                setTimeout(function () {
+                    END_SONG.pause()
+                }, 13650);
+            }, 1490)
+
         } else {
             // If player is not dead, then draw the score
-            this.ctx.font = 'bold 40px Helvetica';
+            this.ctx.font = 'bold 40px VT323';
             this.ctx.fillStyle = '#ffffff';
             this.ctx.fillText(this.score, 8, 40);
 
@@ -312,6 +440,7 @@ class Engine {
         }
     }
 
+    // Element Collisions
     isPlayerDead() {
         var enemyHit = (enemy) => {
             if (enemy.x === this.player.x &&
@@ -323,6 +452,17 @@ class Engine {
         return this.enemies.some(enemyHit);
     }
 
+    isFriend() {
+        var friendHit = (friend) => {
+            if (friend.x === this.player.x &&
+                (friend.y > this.player.y - FRIENDLY_HEIGHT) &&
+                friend.y < this.player.y) {
+                return true;
+            }
+        };
+        return this.friends.some(friendHit);
+    }
+
     isBonusPoint() {
         var bonusHit = (bonus) => {
             if (bonus.x === this.player.x &&
@@ -332,6 +472,17 @@ class Engine {
             }
         };
         return this.bonus.some(bonusHit);
+    }
+
+    isGold() {
+        var goldHit = (gold) => {
+            if (gold.x === this.player.x &&
+                (gold.y > this.player.y - GOLD_HEIGHT) &&
+                gold.y < this.player.y) {
+                return true;
+            }
+        };
+        return this.gold.some(goldHit);
     }
 }
 
