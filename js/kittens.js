@@ -3,13 +3,14 @@
 //--- DONE! 2: Add an end screen (w/ Game Over Message, Press to Restart, New Image, Final Score)
 //--- DONE! 3: Press Enter to restart on game-over
 //--- DONE! 4: Have 2 different Yeezy Boosts (safe/"real" ones + fake ones that ends the game)
-//--- DONE! 5: Add 'bonus' sprite which adds points to conuter
+//--- DONE! 5: Add 'bonus' sprite which adds points to counter
 //--- DONE! 6: Add music during gameplay, sound on game-over and when crossing the safe enemy
 //--- DONE! 7: Redesign Game-Over screen
 //--- DONE! 8: Add Background Music
 //--- DONE! 9: Add multiple lives to player
 //--- DONE! 10: Player = Kanye
-// 11: Make background image pan horizontally
+//--- DONE! 11: Make background image pan horizontally
+// 12: Add shooting bullets with spacebar function
 
 
 // 10 ELEMENTS FROM EACH YE ALBUM:
@@ -22,7 +23,7 @@
 // The Life of Pablo: (10)Game Play Background song "Fade" (track 19)
 
 
-// This sectin contains some game constants. It is not super interesting
+// This section contains some game constants. It is not super interesting
 var GAME_WIDTH = 750;
 var GAME_HEIGHT = 550;
 
@@ -80,11 +81,12 @@ var ENTER = 'enter'
 
 // Preload game images
 var images = {};
-['bonus.png', 'stars2.png', 'fakes.png', 'boosts.png', 'player2.png', 'jesus.png', 'heart.png'].forEach(imgName => {
+['bonus.png', 'stars2.png', 'fakes.png', 'boosts.png', 'player2.png', 'jesus.png', 'heart.png', 'sky_long.png', 'big_heart.png'].forEach(imgName => {
     var img = document.createElement('img');
     img.src = 'images/' + imgName;
     images[imgName] = img;
 });
+
 
 
 // This section is where you will be doing most of your coding
@@ -205,6 +207,7 @@ class Engine {
         element.appendChild(canvas);
 
         this.ctx = canvas.getContext('2d');
+        this.bgScroll = 0;
 
         // Since gameLoop will be called out of context, bind it once here.
         this.gameLoop = this.gameLoop.bind(this);
@@ -318,7 +321,6 @@ class Engine {
             } else if (e.keyCode === ENTER_CODE) {
                 document.location.reload();
             }
-
         });
 
         this.gameLoop();
@@ -336,6 +338,7 @@ class Engine {
     You should use this parameter to scale your update appropriately
      */
     gameLoop() {
+
         // Check how long it's been since last frame
         var currentFrame = Date.now();
         var timeDiff = currentFrame - this.lastFrame;
@@ -349,9 +352,12 @@ class Engine {
         this.bonus.forEach(bonus => bonus.update(timeDiff));
         this.gold.forEach(gold => gold.update(timeDiff));
 
+        if (this.bgScroll <= -GAME_WIDTH){
+            this.bgScroll = 0;
+        }
 
         // Draw everything!
-        this.ctx.drawImage(images['stars2.png'], 0, 0); // draw the sky bg
+        this.ctx.drawImage(images['sky_long.png'], this.bgScroll--, 0); // draw the sky bg
         this.enemies.forEach(enemy => enemy.render(this.ctx)); // draw the fake yeezys
         this.friends.forEach(friend => friend.render(this.ctx)); // draw the real boosts
         this.bonus.forEach(bonus => bonus.render(this.ctx)); // draw the bonus bear
@@ -391,10 +397,10 @@ class Engine {
         // Check if real pair of Boosts
         if (this.isGold()) {
             this.ctx.fillStyle = "red";
-            this.ctx.fillRect(530, 230, 220, 200);
+            this.ctx.fillRect(530, 180, 220, 200);
             this.ctx.font = 'bold 60px VT323';
             this.ctx.fillStyle = '#000000';
-            this.ctx.fillText('+ 1,050', 560, 340);
+            this.ctx.fillText('+ 1,050', 560, 290);
             this.score += 1050;
             GOD.play();
             BGM.volume = .02;
@@ -406,10 +412,10 @@ class Engine {
         // Check if Bonus Bear
         if (this.isBonusPoint()) {
             this.ctx.fillStyle = "red";
-            this.ctx.fillRect(530, 230, 220, 200);
-            this.ctx.font = 'bold 75px VT323';
+            this.ctx.fillRect(530, 180, 220, 200);
+            this.ctx.font = 'bold 60px VT323';
             this.ctx.fillStyle = '#000000';
-            this.ctx.fillText('+ 350', 570, 355);
+            this.ctx.fillText('+ 350', 583, 290);
             this.score += 350;
             KNYE_1.play();
             BGM.volume = .02;
@@ -421,9 +427,10 @@ class Engine {
         // Check how many lives left
         if (this.isPlayerDead()) {
             COUNTER -= 1;
-            this.ctx.font = 'bold 90px VT323';
-            this.ctx.fillStyle = '#000000';
-            this.ctx.fillText('-1', 350, 295);
+            this.ctx.font = 'bold 120px VT323';
+            this.ctx.fillStyle = 'red';
+            this.ctx.fillText('-1', 365, 305);
+            this.ctx.drawImage(images['big_heart.png'], 235, 230);
 
             if (COUNTER < 59) {
                 GOD.pause();

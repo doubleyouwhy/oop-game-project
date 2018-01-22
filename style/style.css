@@ -18,8 +18,8 @@ body {
     padding-right: 25px;
 }
 
-.info{
-    margin-left: auto;
+.info {
+    margin-left: 30px;
     margin-right: auto;
 }
 
@@ -30,7 +30,7 @@ body {
     cursor: pointer;
 }
 
-.info h4:hover + .hidden{
+.info h4:hover+.hidden {
     cursor: pointer;
     display: block;
 }
@@ -49,7 +49,6 @@ body {
     color: white;
 }
 
-
 .info img {
     width: 160px;
     margin-left: 20px;
@@ -57,13 +56,13 @@ body {
     margin-top: 30px;
 }
 
-.hidden{
+.hidden {
     cursor: pointer;
     display: none;
     position: absolute;
     background-color: black;
-    margin-top:-300px;
-    margin-left: 337px;
+    margin-top: -300px;
+    margin-left: 365px;
     padding-right: 15px;
 }
 
@@ -74,7 +73,6 @@ ul {
 h4 {
     font-size: 20px;
     cursor: pointer;
-
 }
 
 mark {
@@ -92,15 +90,18 @@ canvas {
     display: flex;
 }
 
-
 #game {
     margin-top: auto;
     margin-bottom: auto;
     display: flex;
 }
 
-.right-side{
+.right-side {
     display: flex;
     align-items: right;
     text-align: right;
 }
+
+::selection {
+    background-color: black; /* WebKit/Blink Browsers */
+  }
