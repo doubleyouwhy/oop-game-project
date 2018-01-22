@@ -7,7 +7,7 @@
 //--- DONE! 6: Add music during gameplay, sound on game-over and when crossing the safe enemy
 //--- DONE! 7: Redesign Game-Over screen
 //--- DONE! 8: Add Background Music
-// 9: Add function to shoot the enemies
+//--- DONE! 9: Add multiple lives to player
 //--- DONE! 10: Player = Kanye
 // 11: Make background image pan horizontally
 
@@ -23,8 +23,8 @@
 
 
 // This sectin contains some game constants. It is not super interesting
-var GAME_WIDTH = 800;
-var GAME_HEIGHT = 600;
+var GAME_WIDTH = 750;
+var GAME_HEIGHT = 550;
 
 var ENEMY_WIDTH = 75;
 var ENEMY_HEIGHT = 156;
@@ -42,14 +42,20 @@ var GOLD_WIDTH = 75;
 var GOLD_HEIGHT = 156;
 var MAX_GOLD = .5;
 
+var HEART_WIDTH = 75;
+var HEART_HEIGHT = 62;
+var MAX_HEARTS = 3;
+
 var PLAYER_WIDTH = 75;
 var PLAYER_HEIGHT = 54;
 
+var COUNTER = 60;
+
 // Game music and sounds
 var BGM = document.getElementById('bgm');
-BGM.volume = .38;
+BGM.volume = .6;
 var END_SONG = document.getElementById('end_song');
-END_SONG.volume = .3;
+END_SONG.volume = .6;
 var KNYE_1 = document.getElementById('kanye1');
 var KNYE_2 = document.getElementById('kanye2');
 var KNYE_3 = document.getElementById('scream');
@@ -74,7 +80,7 @@ var ENTER = 'enter'
 
 // Preload game images
 var images = {};
-['bonus.png', 'stars2.png', 'fakes.png', 'boosts.png', 'player2.png', 'jesus.png'].forEach(imgName => {
+['bonus.png', 'stars2.png', 'fakes.png', 'boosts.png', 'player2.png', 'jesus.png', 'heart.png'].forEach(imgName => {
     var img = document.createElement('img');
     img.src = 'images/' + imgName;
     images[imgName] = img;
@@ -123,7 +129,7 @@ class Gold extends Bonus {
     constructor(xPos) {
         super();
         this.x = xPos;
-        this.y = -BONUS_HEIGHT;
+        this.y = -GOLD_HEIGHT;
         this.sprite = images['jesus.png'];
 
         // Each enemy should have a different speed
@@ -345,12 +351,13 @@ class Engine {
 
 
         // Draw everything!
-        this.ctx.drawImage(images['stars2.png'], 0, 0); // draw the star bg
-        this.enemies.forEach(enemy => enemy.render(this.ctx)); // draw the enemies
-        this.friends.forEach(friend => friend.render(this.ctx)); // draw the enemies
-        this.bonus.forEach(bonus => bonus.render(this.ctx)); // draw the bonus
-        this.gold.forEach(gold => gold.render(this.ctx)); // draw the bonus
-        this.player.render(this.ctx); // draw the player
+        this.ctx.drawImage(images['stars2.png'], 0, 0); // draw the sky bg
+        this.enemies.forEach(enemy => enemy.render(this.ctx)); // draw the fake yeezys
+        this.friends.forEach(friend => friend.render(this.ctx)); // draw the real boosts
+        this.bonus.forEach(bonus => bonus.render(this.ctx)); // draw the bonus bear
+        this.gold.forEach(gold => gold.render(this.ctx)); // draw the jesus piece
+        this.ctx.drawImage(images['heart.png'], 575, 8); // draw the heart
+        this.player.render(this.ctx); // draw kanye
 
         // Check if any enemies should die
         this.enemies.forEach((enemy, enemyIdx) => {
@@ -384,55 +391,99 @@ class Engine {
         // Check if real pair of Boosts
         if (this.isGold()) {
             this.ctx.fillStyle = "red";
-            this.ctx.fillRect(580, 230, 220, 200);
+            this.ctx.fillRect(530, 230, 220, 200);
             this.ctx.font = 'bold 60px VT323';
             this.ctx.fillStyle = '#000000';
-            this.ctx.fillText('+ 1,050', 615, 340);
-            this.score += 350;
+            this.ctx.fillText('+ 1,050', 560, 340);
+            this.score += 1050;
             GOD.play();
+            BGM.volume = .02;
+            setTimeout(function () {
+                BGM.volume = .6;
+            }, 1000)
         }
 
         // Check if Bonus Bear
         if (this.isBonusPoint()) {
             this.ctx.fillStyle = "red";
-            this.ctx.fillRect(580, 230, 220, 200);
+            this.ctx.fillRect(530, 230, 220, 200);
             this.ctx.font = 'bold 75px VT323';
             this.ctx.fillStyle = '#000000';
-            this.ctx.fillText('+ 350', 615, 355);
+            this.ctx.fillText('+ 350', 570, 355);
             this.score += 350;
             KNYE_1.play();
+            BGM.volume = .02;
+            setTimeout(function () {
+                BGM.volume = .38;
+            }, 400)
+        }
+
+        // Check how many lives left
+        if (this.isPlayerDead()) {
+            COUNTER -= 1;
+            this.ctx.font = 'bold 90px VT323';
+            this.ctx.fillStyle = '#000000';
+            this.ctx.fillText('-1', 350, 295);
+
+            if (COUNTER < 59) {
+                GOD.pause();
+                BGM.volume = 0;
+                setTimeout(function () {
+                    BGM.volume = .38;
+                }, 550)
+                KNYE_2.play();
+                MAX_HEARTS = 2;
+            }
+            if (COUNTER < 30) {
+                KNYE_2.play();
+                GOD.pause();
+                BGM.volume = 0;
+                setTimeout(function () {
+                    BGM.volume = .38;
+                }, 550)
+                MAX_HEARTS = 1;
+            }
+            if (COUNTER < 2) {
+                MAX_HEARTS = 0;
+            }
         }
 
         // Check if player is dead
-        if (this.isPlayerDead()) {
-            // If they are dead, then it's game over!
+        // If they are dead, then it's game over!
+        if (MAX_HEARTS == 0) {
             this.ctx.fillStyle = "red";
-            this.ctx.fillRect(185, 230, 425, 100);
+            this.ctx.fillRect(165, 230, 425, 100);
             this.ctx.font = '700 40px VT323';
             this.ctx.fillStyle = '#ffffff';
             this.ctx.fillText('FINAL SCORE ' + this.score, 8, 40);
-            this.ctx.fillText('TWO WORDS: GAME OVER', 236, 290);
+            this.ctx.fillText(MAX_HEARTS + " LIVES", 630, 40);
+            this.ctx.fillText('TWO WORDS: GAME OVER', 218, 290);
             this.ctx.fillStyle = "black";
-            this.ctx.fillRect(300, 450, 200, 45);
+            this.ctx.fillRect(276, 450, 200, 45);
             this.ctx.font = '700 20px VT323';
             this.ctx.fillStyle = '#ffffff';
-            this.ctx.fillText('TRY AGAIN > HIT ENTER', 315, 477);
+            this.ctx.fillText('TRY AGAIN > HIT ENTER', 291, 477);
             BGM.pause();
             GOD.pause();
             KNYE_1.pause();
+            KNYE_2.pause();
             KNYE_3.play();
             setTimeout(function () {
                 END_SONG.play();
                 setTimeout(function () {
                     END_SONG.pause()
-                }, 13650);
-            }, 1490)
+                }, 13400);
+            }, 1390)
+
 
         } else {
             // If player is not dead, then draw the score
             this.ctx.font = 'bold 40px VT323';
             this.ctx.fillStyle = '#ffffff';
             this.ctx.fillText(this.score, 8, 40);
+            this.ctx.font = 'bold 40px VT323';
+            this.ctx.fillStyle = '#ffffff';
+            this.ctx.fillText(MAX_HEARTS + " LIVES", 630, 40);
 
             // Set the time marker and redraw
             this.lastFrame = Date.now();
