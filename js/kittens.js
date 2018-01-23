@@ -13,16 +13,6 @@
 // 12: Add shooting bullets with spacebar function
 
 
-// 10 ELEMENTS FROM EACH YE ALBUM:
-// College Dropout: (1)"Two Words Game Over" message in reference to "Two Words" (track 18)
-// Late Registration: (2)Jamie Foxx sample from "Gold Digger" (track 4) & (3)Game elements are 'touching' the sky BG image... "Touch The Sky" (track 3)
-// Graduation: (4)Bonus Bear +350 Points - Kanye Bear illustration from Graduation
-// 808s & Heartbreaks: (5)'Heart' User Lives or Bullets
-// My Beautiful Dark Twisted Fantasy: (6)Scream sampled from "Monster" (track 6) + (7)Background Image is a zoom in of 1 of the 9 official alternate album covers
-// Yeezus: (8)Game Over song "Bound 2" (track 10) + (9)Red Square motif on the right references album cover's red tape design
-// The Life of Pablo: (10)Game Play Background song "Fade" (track 19)
-
-
 // This section contains some game constants. It is not super interesting
 var GAME_WIDTH = 750;
 var GAME_HEIGHT = 550;
@@ -352,7 +342,7 @@ class Engine {
         this.bonus.forEach(bonus => bonus.update(timeDiff));
         this.gold.forEach(gold => gold.update(timeDiff));
 
-        if (this.bgScroll <= -GAME_WIDTH){
+        if (this.bgScroll <= -GAME_WIDTH) {
             this.bgScroll = 0;
         }
 
